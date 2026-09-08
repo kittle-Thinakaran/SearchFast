@@ -1,0 +1,134 @@
+{
+  "name": "searchfast-antigravity",
+  "displayName": "SearchFast Antigravity",
+  "description": "Ultra-fast file and content search powered by ripgrep",
+  "version": "1.0.0",
+  "publisher": "searchfast",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "keywords": ["search", "ripgrep", "rg", "fast", "find", "grep"],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "icon": "icon.png",
+  "contributes": {
+    "commands": [
+      {
+        "command": "searchfast.searchWordUnderCursor",
+        "title": "SearchFast: Search Word Under Cursor"
+      },
+      {
+        "command": "searchfast.searchSelectedText",
+        "title": "SearchFast: Search Selected Text"
+      },
+      {
+        "command": "searchfast.checkRipgrep",
+        "title": "SearchFast: Check Ripgrep Installation"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "searchfast",
+          "title": "SearchFast Antigravity",
+          "icon": "$(search)"
+        }
+      ]
+    },
+    "views": {
+      "searchfast": [
+        {
+          "type": "webview",
+          "id": "searchfast.searchView",
+          "name": "Search"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "searchfast.searchWordUnderCursor",
+        "key": "ctrl+alt+f",
+        "mac": "cmd+alt+f"
+      },
+      {
+        "command": "searchfast.searchWordUnderCursor",
+        "key": "ctrl+alt+d",
+        "mac": "cmd+alt+d"
+      }
+    ],
+    "configuration": {
+      "title": "SearchFast Antigravity",
+      "properties": {
+        "searchfast.ripgrepPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to ripgrep binary. Leave empty to auto-detect."
+        },
+        "searchfast.maxResults": {
+          "type": "number",
+          "default": 5000,
+          "description": "Maximum number of search results to display."
+        },
+        "searchfast.contextLines": {
+          "type": "number",
+          "default": 2,
+          "description": "Number of context lines around each match."
+        },
+        "searchfast.caseSensitive": {
+          "type": "boolean",
+          "default": false,
+          "description": "Default case sensitivity for searches."
+        },
+        "searchfast.wholeWord": {
+          "type": "boolean",
+          "default": false,
+          "description": "Default whole word matching."
+        },
+        "searchfast.useRegex": {
+          "type": "boolean",
+          "default": false,
+          "description": "Default regex mode."
+        },
+        "searchfast.followSymlinks": {
+          "type": "boolean",
+          "default": false,
+          "description": "Follow symbolic links during search."
+        },
+        "searchfast.hiddenFiles": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include hidden files and directories."
+        },
+        "searchfast.respectGitignore": {
+          "type": "boolean",
+          "default": true,
+          "description": "Respect .gitignore rules."
+        },
+        "searchfast.defaultExcludes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["node_modules", ".git", "dist", "build", ".next", "__pycache__", ".venv", "vendor"],
+          "description": "Default directories/patterns to exclude from search."
+        },
+        "searchfast.enableHighlight": {
+          "type": "boolean",
+          "default": true,
+          "description": "Highlight search matches in results."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.3",
+    "@vscode/vsce": "^2.22.0"
+  }
+}
