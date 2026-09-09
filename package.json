@@ -2,7 +2,7 @@
   "name": "searchfast",
   "displayName": "SearchFast",
   "description": "Ultra-fast file and content search powered by ripgrep (rg). Search your entire workspace, replace matches instantly, live as-you-type results, and lightning-fast navigation — a faster, lighter alternative to the built-in explorer.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "publisher": "searchfast",
   "author": "Thinakaran Manokaran",
   "license": "MIT",
