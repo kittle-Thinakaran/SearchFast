@@ -4,14 +4,25 @@
   "description": "Ultra-fast file and content search powered by ripgrep",
   "version": "1.0.0",
   "publisher": "searchfast",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/searchfast/searchfast-antigravity"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": ["Other"],
   "keywords": ["search", "ripgrep", "rg", "fast", "find", "grep"],
-  "activationEvents": [],
+  "activationEvents": [
+    "onView:searchfast.searchView",
+    "onCommand:searchfast.searchWordUnderCursor",
+    "onCommand:searchfast.searchSelectedText",
+    "onCommand:searchfast.checkRipgrep",
+    "onCommand:searchfast.focusSearchInput",
+    "onCommand:searchfast.changeShortcuts"
+  ],
   "main": "./out/extension.js",
-  "icon": "icon.png",
+  "icon": "resources/icon.png",
   "contributes": {
     "commands": [
       {
@@ -25,6 +36,14 @@
       {
         "command": "searchfast.checkRipgrep",
         "title": "SearchFast: Check Ripgrep Installation"
+      },
+      {
+        "command": "searchfast.focusSearchInput",
+        "title": "SearchFast: Focus Search Box"
+      },
+      {
+        "command": "searchfast.changeShortcuts",
+        "title": "SearchFast: Change Keyboard Shortcuts"
       }
     ],
     "viewsContainers": {
@@ -49,12 +68,19 @@
       {
         "command": "searchfast.searchWordUnderCursor",
         "key": "ctrl+alt+f",
-        "mac": "cmd+alt+f"
+        "mac": "cmd+alt+f",
+        "when": "editorTextFocus"
       },
       {
-        "command": "searchfast.searchWordUnderCursor",
+        "command": "searchfast.searchSelectedText",
         "key": "ctrl+alt+d",
-        "mac": "cmd+alt+d"
+        "mac": "cmd+alt+d",
+        "when": "editorTextFocus && editorHasSelection"
+      },
+      {
+        "command": "searchfast.focusSearchInput",
+        "key": "ctrl+alt+s",
+        "mac": "cmd+alt+s"
       }
     ],
     "configuration": {
@@ -115,6 +141,25 @@
           "type": "boolean",
           "default": true,
           "description": "Highlight search matches in results."
+        },
+        "searchfast.liveSearchDelay": {
+          "type": "number",
+          "default": 300,
+          "minimum": 0,
+          "maximum": 2000,
+          "description": "How long to wait (in milliseconds) after you stop typing before SearchFast searches automatically."
+        },
+        "searchfast.minQueryLength": {
+          "type": "number",
+          "default": 2,
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Minimum number of characters required before SearchFast searches automatically as you type. Press Enter to search regardless of this setting."
+        },
+        "searchfast.confirmBeforeReplace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask for confirmation before replacing text in your files. Turning this off is not recommended."
         }
       }
     }
