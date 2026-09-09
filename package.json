@@ -6,13 +6,13 @@
   "publisher": "searchfast",
   "author": "Thinakaran Manokaran",
   "license": "MIT",
-  "homepage": "https://github.com/searchfast/searchfast#readme",
+  "homepage": "https://github.com/kittle-Thinakaran/SearchFast#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/searchfast/searchfast.git"
+    "url": "https://github.com/kittle-Thinakaran/SearchFast.git"
   },
   "bugs": {
-    "url": "https://github.com/searchfast/searchfast/issues"
+    "url": "https://github.com/kittle-Thinakaran/SearchFast/issues"
   },
   "engines": {
     "vscode": "^1.85.0"
