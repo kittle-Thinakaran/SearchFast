@@ -1,18 +1,53 @@
 {
-  "name": "searchfast-antigravity",
-  "displayName": "SearchFast Antigravity",
-  "description": "Ultra-fast file and content search powered by ripgrep",
+  "name": "searchfast",
+  "displayName": "SearchFast",
+  "description": "Ultra-fast file and content search powered by ripgrep (rg). Search your entire workspace, replace matches instantly, live as-you-type results, and lightning-fast navigation — a faster, lighter alternative to the built-in explorer.",
   "version": "1.0.0",
   "publisher": "searchfast",
+  "author": "Thinakaran Manokaran",
+  "license": "MIT",
+  "homepage": "https://github.com/searchfast/searchfast#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/searchfast/searchfast-antigravity"
+    "url": "https://github.com/searchfast/searchfast.git"
+  },
+  "bugs": {
+    "url": "https://github.com/searchfast/searchfast/issues"
   },
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": ["Other"],
-  "keywords": ["search", "ripgrep", "rg", "fast", "find", "grep"],
+  "keywords": [
+    "search",
+    "find",
+    "grep",
+    "ripgrep",
+    "rg",
+    "replace",
+    "code search",
+    "workspace search",
+    "file search",
+    "find in files",
+    "search and replace",
+    "fast",
+    "ultra fast",
+    "productivity",
+    "developer tools",
+    "ide",
+    "vscode",
+    "vscodium",
+    "open-vsx",
+    "live search",
+    "regex",
+    "full text search"
+  ],
+  "galleryBanner": {
+    "color": "#1e1e2e",
+    "theme": "dark"
+  },
+  "icon": "resources/icon.png",
+  "markdown": "github",
   "activationEvents": [
     "onView:searchfast.searchView",
     "onCommand:searchfast.searchWordUnderCursor",
@@ -22,7 +57,6 @@
     "onCommand:searchfast.changeShortcuts"
   ],
   "main": "./out/extension.js",
-  "icon": "resources/icon.png",
   "contributes": {
     "commands": [
       {
@@ -50,7 +84,7 @@
       "activitybar": [
         {
           "id": "searchfast",
-          "title": "SearchFast Antigravity",
+          "title": "SearchFast",
           "icon": "$(search)"
         }
       ]
@@ -84,7 +118,7 @@
       }
     ],
     "configuration": {
-      "title": "SearchFast Antigravity",
+      "title": "SearchFast",
       "properties": {
         "searchfast.ripgrepPath": {
           "type": "string",
@@ -168,7 +202,8 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "vsce package"
+    "package": "vsce package",
+    "publish": "vsce publish"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
