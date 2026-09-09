@@ -164,6 +164,16 @@ const CSS = `
   [hidden] { display: none !important; }
   html, body { margin: 0; padding: 0; height: 100%; }
 
+  .app {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .app input,
+  .app textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
   body {
     font-family: var(--vscode-font-family, system-ui, sans-serif);
     font-size: var(--vscode-font-size, 13px);
@@ -457,6 +467,17 @@ const CSS = `
     opacity: 0;
   }
   .file-replace-btn:focus-visible { opacity: 1; }
+
+  .match-replace-btn {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    opacity: 0;
+    margin-right: 6px;
+    align-self: center;
+  }
+  .v-match:hover .match-replace-btn,
+  .match-replace-btn:focus-visible { opacity: 1; }
 
   .line-num {
     min-width: 42px;
@@ -991,8 +1012,29 @@ const CLIENT_SCRIPT = `
     lineText.className = 'line-text';
     highlightInto(lineText, m.text);
 
+    var matchBtn = document.createElement('button');
+    matchBtn.className = 'icon-btn match-replace-btn';
+    matchBtn.title = 'Replace this match';
+    matchBtn.setAttribute('aria-label', 'Replace this match');
+    matchBtn.innerHTML = ${JSON.stringify(ICONS.replace)};
+    matchBtn.addEventListener('click', function (evt) {
+      evt.stopPropagation();
+      var pattern = searchInput.value.trim();
+      if (!pattern) { return; }
+      vscode.postMessage({
+        type: 'replaceMatch',
+        pattern: pattern,
+        replacement: replaceInput.value,
+        options: currentOptions(),
+        file: m.file,
+        line: m.line,
+        column: typeof m.column === 'number' ? m.column : 0,
+      });
+    });
+
     line.appendChild(lineNum);
     line.appendChild(lineText);
+    line.appendChild(matchBtn);
     return line;
   }
 

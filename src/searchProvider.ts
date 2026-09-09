@@ -8,6 +8,7 @@ import {
   executeSearch,
   executeReplace,
   listMatchingFiles,
+  replaceSingleMatch,
   getDefaultOptions,
   cancelSearch,
 } from "./searchEngine";
@@ -136,6 +137,10 @@ export class SearchSidebarProvider implements vscode.WebviewViewProvider {
         await this._doReplace(String(msg.pattern ?? ""), String(msg.replacement ?? ""), msg.options ?? {}, String(
           msg.file ?? ""
         ));
+        break;
+
+      case "replaceMatch":
+        await this._replaceSingle(String(msg.pattern ?? ""), String(msg.replacement ?? ""), msg.options ?? {}, msg);
         break;
 
       case "openShortcuts":
@@ -308,6 +313,73 @@ export class SearchSidebarProvider implements vscode.WebviewViewProvider {
 
       // Refresh the results list so it reflects the file contents after the edit.
       await this._doSearch(pattern, overrides);
+    } catch (err) {
+      this._post({ type: "replaceError", message: describeError(err) });
+    } finally {
+      this._replacing = false;
+    }
+  }
+
+  private async _replaceSingle(
+    pattern: string,
+    replacement: string,
+    overrides: Partial<SearchOptions>,
+    msg: any
+  ): Promise<void> {
+    if (this._replacing) {
+      this._post({ type: "error", message: "A replace is already running. Please wait for it to finish." });
+      return;
+    }
+    const filePath = String(msg.file ?? "");
+    const line = Number(msg.line) || 1;
+    const column = Number(msg.column) || 0;
+    if (!pattern || !pattern.trim() || !filePath) {
+      this._post({ type: "error", message: "Could not replace this match." });
+      return;
+    }
+
+    let targetPath = filePath;
+    const workspaceRoot = this._workspaceRoot();
+    if (
+      workspaceRoot &&
+      !filePath.includes(":") &&
+      !filePath.startsWith("/") &&
+      !filePath.startsWith("\\\\") &&
+      !filePath.startsWith(workspaceRoot)
+    ) {
+      targetPath = join(workspaceRoot, filePath);
+    }
+
+    const base: SearchOptions = { ...getDefaultOptions(), ...overrides, pattern };
+    this._replacing = true;
+    try {
+      this._post({ type: "replaceStarted", fileCount: 1 });
+      const result = await replaceSingleMatch({
+        filePath: targetPath,
+        line,
+        column,
+        pattern: base.pattern,
+        replacement,
+        caseSensitive: base.caseSensitive,
+        wholeWord: base.wholeWord,
+        useRegex: base.useRegex,
+      });
+
+      if (result.error) {
+        this._post({ type: "replaceError", message: `Replace failed: ${result.error}` });
+      } else if (!result.replaced) {
+        this._post({ type: "error", message: "No match was found to replace." });
+      } else {
+        this._post({
+          type: "replaceDone",
+          summary: {
+            filesChanged: 1,
+            totalReplacements: 1,
+            results: [{ file: targetPath, replacements: 1 }],
+          },
+        });
+        await this._doSearch(pattern, overrides);
+      }
     } catch (err) {
       this._post({ type: "replaceError", message: describeError(err) });
     } finally {

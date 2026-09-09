@@ -494,14 +494,104 @@ function buildReplaceScanArgs(options: ReplaceOptions): string[] {
   return args;
 }
 
+/**
+ * The subset of search options that determine how a JS RegExp should be
+ * built to mirror ripgrep's matching behavior.
+ */
+interface MatcherOptions {
+  pattern: string;
+  useRegex: boolean;
+  wholeWord: boolean;
+  caseSensitive: boolean;
+}
+
 /** Builds a RegExp that mirrors how ripgrep would interpret the same options. */
-function buildMatcher(options: ReplaceOptions): RegExp {
+function buildMatcher(options: MatcherOptions): RegExp {
   let source = options.useRegex ? options.pattern : escapeForRegex(options.pattern);
   if (options.wholeWord) {
     source = `\\b(?:${source})\\b`;
   }
   const flags = options.caseSensitive ? "g" : "gi";
   return new RegExp(source, flags);
+}
+
+export interface ReplaceSingleMatchOptions {
+  filePath: string;
+  line: number;
+  column: number;
+  pattern: string;
+  replacement: string;
+  caseSensitive: boolean;
+  wholeWord: boolean;
+  useRegex: boolean;
+}
+
+export interface ReplaceSingleMatchResult {
+  replaced: boolean;
+  error?: string;
+}
+
+/**
+ * Replaces exactly one occurrence of the pattern: the match on `line` whose
+ * start column equals `column` (the column reported by ripgrep for that
+ * result), falling back to the first occurrence on the line. Only that single
+ * occurrence is changed; the rest of the file is left untouched.
+ */
+export async function replaceSingleMatch(options: ReplaceSingleMatchOptions): Promise<ReplaceSingleMatchResult> {
+  let matcher: RegExp;
+  try {
+    matcher = buildMatcher(options);
+  } catch (err) {
+    return { replaced: false, error: err instanceof Error ? err.message : String(err) };
+  }
+
+  try {
+    const original = await fs.readFile(options.filePath, "utf-8");
+    // Split on "\n" only so CRLF files keep their \r line endings intact.
+    const lines = original.split("\n");
+    const lineIdx = Math.max(0, Math.min(options.line - 1, lines.length - 1));
+    const lineText = lines[lineIdx];
+
+    const search = new RegExp(matcher.source, matcher.flags);
+    const occurrences: Array<{ start: number; text: string }> = [];
+    let match: RegExpExecArray | null;
+    search.lastIndex = 0;
+    while ((match = search.exec(lineText)) !== null && occurrences.length < 5000) {
+      if (match[0].length === 0) {
+        search.lastIndex++;
+        continue;
+      }
+      occurrences.push({ start: match.index, text: match[0] });
+      if (search.lastIndex === match.index) {
+        search.lastIndex++;
+      }
+    }
+
+    const target = occurrences.find((o) => o.start === options.column) ?? occurrences[0];
+    if (!target) {
+      return { replaced: false };
+    }
+
+    const replacementText = options.useRegex
+      ? options.replacement
+      : options.replacement.replace(/\$/g, "$$$$");
+
+    const segment = lineText.slice(target.start, target.start + target.text.length);
+    const editedLine =
+      lineText.slice(0, target.start) +
+      segment.replace(matcher, replacementText) +
+      lineText.slice(target.start + target.text.length);
+
+    if (editedLine === lineText) {
+      return { replaced: false };
+    }
+
+    lines[lineIdx] = editedLine;
+    await fs.writeFile(options.filePath, lines.join("\n"), "utf-8");
+    return { replaced: true };
+  } catch (err) {
+    return { replaced: false, error: err instanceof Error ? err.message : String(err) };
+  }
 }
 
 function escapeForRegex(value: string): string {
